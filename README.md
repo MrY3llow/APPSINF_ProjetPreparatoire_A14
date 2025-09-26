@@ -13,7 +13,9 @@ Cette première étape sert uniquement à montrer le visuel du site.
 Trois pages HTML :
 
 incident-creation-page.html
+
 login-page.html
+
 main-page.html
 
 Un fichier CSS :
