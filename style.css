@@ -153,3 +153,31 @@ img{ max-width:100%; display:block; }
 .input-area{ min-height: 160px; resize: vertical; }
 
 .actions{ display:flex; gap:12px; align-items:center; }
+
+
+/*--------------------------*/
+/*-- login + signup style --*/
+/*--------------------------*/
+.input_bars {
+  text-align: center;
+}
+
+.input_bars h1 {
+  padding-bottom: 15px;
+}
+
+.input_bars h2 {
+  padding-bottom: 3px;
+}
+
+.input_bars form {
+  padding-bottom: 5px;
+}
+
+.input_bars input[type="text"] {
+  width: 17%;
+  text-align: center;
+  box-sizing: border-box;
+
+
+}
