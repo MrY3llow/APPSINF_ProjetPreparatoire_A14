@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mon Site d’Événements</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-row">
+      <a class="brand" href="index.html" aria-label="Accueil">
+        <img src="logo/logo.png" alt="Logo du site" class="brand-logo">
+        <span class="brand-title">Mon Site d’Événements</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Navigation principale">
+        <a href="index.html" class="nav-link">Accueil</a>
+        <a href="login.html" class="nav-link">Connexion</a>
+        <a href="signup.html" class="nav-link">Inscription</a>
+        <a href="incident-creation.html" class="nav-link btn btn-outline">Créer un événement</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <header class="card-head">
+        <h1 class="card-title">Liste des incidents</h1>
+        <p class="card-subtitle">Consultez tous les incidents signalés</p>
+      </header>
+
+      <div class="table-container">
+        <table class="incidents-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Adresse</th>
+              <th>Repporté par</th>
+              <th>Date de signalement</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Exemples d'incidents fictifs -->
+            <tr>
+              <td>Fuite d'eau importante dans la rue</td>
+              <td>Rue de la Paix, 1000 Bruxelles</td>
+              <td>Marie Dupont</td>
+              <td>28/09/2025</td>
+            </tr>
+            <tr>
+              <td>Nid de poule dangereux sur la chaussée</td>
+              <td>Avenue Louise, 1050 Ixelles</td>
+              <td>Jean Martin</td>
+              <td>27/09/2025</td>
+            </tr>
+            <tr>
+              <td>Éclairage public défaillant</td>
+              <td>Boulevard Anspach, 1000 Bruxelles</td>
+              <td>Sophie Leroy</td>
+              <td>26/09/2025</td>
+            </tr>
+            <tr>
+              <td>Arbre tombé bloquant la circulation</td>
+              <td>Chaussée de Waterloo, 1180 Uccle</td>
+              <td>Pierre Bernard</td>
+              <td>25/09/2025</td>
+            </tr>
+            <tr>
+              <td>Graffitis sur façade publique</td>
+              <td>Place Eugène Flagey, 1050 Ixelles</td>
+              <td>Anna Rousseau</td>
+              <td>24/09/2025</td>
+            </tr>
+            <tr>
+              <td>Trottoir endommagé suite aux travaux</td>
+              <td>Rue Neuve, 1000 Bruxelles</td>
+              <td>Michel Leblanc</td>
+              <td>23/09/2025</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="actions">
+        <a href="incident-creation.html" class="btn btn-outline">Signaler un incident</a>
+        <button class="btn btn-ghost" type="button">Actualiser</button>
+      </div>
+    </section>
+  </main>
+
+
+</body>
+</html>
