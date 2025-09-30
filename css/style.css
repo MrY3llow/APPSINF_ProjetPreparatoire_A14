@@ -193,30 +193,3 @@ img{ max-width:100%; display:block; }
   font-style: italic;
   padding: 40px 16px !important;
 }
-
-/*--------------------------*/
-/*-- login + signup style --*/
-/*--------------------------*/
-.input_bars {
-  text-align: center;
-}
-
-.input_bars h1 {
-  padding-bottom: 15px;
-}
-
-.input_bars h2 {
-  padding-bottom: 3px;
-}
-
-.input_bars form {
-  padding-bottom: 5px;
-}
-
-.input_bars input[type="text"] {
-  width: 17%;
-  text-align: center;
-  box-sizing: border-box;
-
-
-}
