@@ -86,22 +86,7 @@ img{ max-width:100%; display:block; }
 }
 .nav-link:hover{ opacity: 1; text-decoration: underline; }
 
-/* Styles pour l'information utilisateur */
-.user-info {
-  display: flex;
-  align-items: center;
-  margin-left: 16px;
-}
 
-.user-name {
-  font-weight: 600;
-  color: var(--text);
-  padding: 8px 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 14px;
-}
 
 .header-right {
   display: flex;
