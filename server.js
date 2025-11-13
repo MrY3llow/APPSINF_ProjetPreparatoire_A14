@@ -1,7 +1,9 @@
 var express = require('express');
 var session = require('express-session');
 var path = require('path');
+var bodyParser = require("body-parser");
 var app = express();
+var fs = require('fs');
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
