@@ -4,10 +4,11 @@
       <h1 class="card-title">Identification</h1>
       <p class="card-subtitle">Connectez-vous à votre compte</p>
     </header>
-    <form class="form">
+    
+    <form class="form" method="POST">
       <div class="field">
         <label for="login-username" class="label">Nom d'utilisateur</label>
-        <input type="text" id="login-username" name="username" class="input" placeholder="Entrez votre nom d'utilisateur" value="<%= username %>">
+        <input type="text" id="login-username" name="username" class="input" placeholder="Entrez votre nom d'utilisateur" value="<%= usernameInput %>">
       </div>
       
       <div class="field">
@@ -18,10 +19,10 @@
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Se connecter</button>
       </div>
+    </form>
 
-  <a href="signup.html" class="form-link" style="display:block; margin-top:1em;">
+  <a href="signup" class="form-link" style="display:block; margin-top:1em;">
     Pas encore de compte ?
   </a>
-    </form>
   </section>
 </main>
