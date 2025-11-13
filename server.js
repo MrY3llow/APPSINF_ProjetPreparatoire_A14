@@ -1,10 +1,17 @@
 var express = require('express');
+var session = require('express-session');
 var path = require('path');
 var app = express();
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
 app.use(express.static(path.join(__dirname, 'static')));
+app.use(session({
+  secret: 'secret',
+  resave: true,
+  saveUninitialized: false
+}))
 
 
 app.get('/', function(req, res, next) {
