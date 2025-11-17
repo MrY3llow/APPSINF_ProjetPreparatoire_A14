@@ -5,7 +5,9 @@
       <p class="card-subtitle">Connectez-vous à votre compte</p>
     </header>
     
+    
     <form class="form" method="POST">
+
       <div class="field">
         <label for="login-username" class="label">Nom d'utilisateur</label>
         <input type="text" id="login-username" name="username" class="input" placeholder="Entrez votre nom d'utilisateur" value="<%= usernameInput %>">
@@ -19,7 +21,14 @@
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Se connecter</button>
       </div>
+      
+      <% if (error) { %>
+      <div class="error-message">
+        <p><%= error %></p>
+      </div>
+      <% } %>
     </form>
+    
 
   <a href="signup" class="form-link" style="display:block; margin-top:1em;">
     Pas encore de compte ?

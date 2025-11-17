@@ -217,6 +217,14 @@ img{ max-width:100%; display:block; }
 .label{ font-weight: 700; }
 .hint{ color: var(--muted); }
 
+.error-message {
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 0px 10px;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
 .input{
   width: 100%;
   border: 1.5px solid var(--border);

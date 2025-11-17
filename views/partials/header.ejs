@@ -18,12 +18,15 @@
     <div class="header-right">
     <nav class="site-nav" aria-label="Navigation principale">
         <a href="/" class="nav-link">Accueil</a>
-        <a href="login" class="nav-link">Connexion</a>
-        <a href="signup" class="nav-link">Inscription</a>
+        <!-- Affiche les boutons de connexion uniquement si l'utilisateur n'est pas connecté. -->
+        <% if(username == undefined) { %>
+            <a href="login" class="nav-link">Connexion</a>
+            <a href="signup" class="nav-link">Inscription</a>
+        <% } %>
         <a href="incident-creation" class="nav-link btn btn-outline">Créer un événement</a>
-        <script>
-        </script>
-        <a href="profil" class="nav-link btn-ghost"><%= username %></a>
+        <% if(username != undefined) { %>
+            <a href="profil" class="nav-link btn-ghost"><%= username %></a>
+        <% } %>
     </nav>
 
     </div>
