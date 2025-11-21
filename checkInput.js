@@ -2,7 +2,14 @@ const checkuserInput = {
 
     isValidUsername : function(input) {
         // BEGIN STRIP
-        if(input.length < 6){
+        if(input.length < 6 || input.length > 20){
+            return false;
+        }
+        if(input.includes(' ')){
+            return false;
+        }
+        // Block email-like patterns (contains both @ and .)
+        if(input.includes('@') && input.includes('.')){
             return false;
         }
         return true;
@@ -11,7 +18,10 @@ const checkuserInput = {
     },
 
     isValidPassword : function(input) {
-        if(input.length < 8){
+        if(input.length < 8 || input.length > 20){
+            return false;
+        }
+        if(input.includes(' ')){
             return false;
         }
         return true;
