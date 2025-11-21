@@ -31,6 +31,35 @@ describe("POST /login", () => {
     expect(res.statusCode).toBe(200); // 200 > Affichage de page classique (On sait que c'est une erreur parce que des identifiants correctes auraient charger une autre page)
     expect(res.text).toContain("Identifiants incorrects");
   });
+
+ 
+
+  // CONNECTION ÉCHOUÉE 
+  it("Login with WRONG username and password", async() => {
+    const res = await request(app)
+      .post('/login')
+      .send({username: '     ', password: '        '})
+    expect(res.statusCode).toBe(200); // 200 > Affichage de page classique (On sait que c'est une erreur car les usernames et les mots de passe ne doivent pas contenir des espaces)
+    expect(res.text).toContain("Identifiants incorrects");
+  });
+
+  // CONNECTION ÉCHOUÉE 
+  it("Login with WRONG password", async() => {
+    const res = await request(app)
+      .post('/login')
+      .send({username: 'John', password: '        '})
+    expect(res.statusCode).toBe(200); // 200 > Affichage de page classique (On sait que c'est une erreur car le mot de passe ne doit pas contenir des espaces)
+    expect(res.text).toContain("Identifiants incorrects");
+  });
+
+  // CONNECTION ÉCHOUÉE 
+  it("Login with WRONG username", async() => {
+    const res = await request(app)
+      .post('/login')
+      .send({username: '     ', password: '123pass'})
+    expect(res.statusCode).toBe(200); /// 200 > Affichage de page classique (On sait que c'est une erreur car le username ne doit pas contenir des espaces)
+    expect(res.text).toContain("Identifiants incorrects");
+  });
 });
 
 
