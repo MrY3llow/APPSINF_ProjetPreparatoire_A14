@@ -177,7 +177,6 @@ img{ max-width:100%; display:block; }
   color: var(--primary-contrast);
   font-weight: 700;
   box-shadow: var(--shadow);
-  cursor: not-allowed; 
 }
 .btn-outline{
   background: transparent;

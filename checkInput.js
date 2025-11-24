@@ -21,6 +21,14 @@ const checkuserInput = {
     isValidEmail : function(input) {
         const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         return regex.test(input);
+    },
+
+    isValidIncidentDescription : function(input) {
+        return (input.length > 5);
+    },
+
+    isValidIncidentAddress : function(input) {
+        return (input.length > 15);
     }
 
 }

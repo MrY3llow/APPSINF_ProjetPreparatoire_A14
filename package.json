@@ -12,10 +12,12 @@
     "verbose": true
   },
   "dependencies": {
+    "crypto": "^1.0.1",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
     "jest": "^30.2.0",
+    "mongodb": "^7.0.0",
     "selenium": "^2.20.0",
     "selenium-webdriver": "^4.38.0",
     "sequelize": "^6.37.7",

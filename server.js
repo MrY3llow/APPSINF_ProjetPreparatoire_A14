@@ -1,3 +1,7 @@
+//   +-------------------------------+
+//   |   LIBRAIRIES & IMPORTATIONS   |
+//   +-------------------------------+
+
 var express = require('express');
 var session = require('express-session');
 var path = require('path');
@@ -5,9 +9,14 @@ var bodyParser = require("body-parser");
 var app = express();
 var https = require('https');
 var fs = require('fs');
-// var sequelize = require('sequelize');
 const { checkUserInput } = require('./checkInput.js');
+const db = require('./db.js');
+MongoClient = require('mongodb').MongoClient;
 
+
+//   +--------------------------------+
+//   |   PARAMÈTRES & CONFIGURATION   |
+//   +--------------------------------+
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -27,99 +36,230 @@ app.use(session({
 app.use(express.static(path.join(__dirname, 'static')));
 
 
-// Page principale
-app.get('/', function(req, res, next) {
-  res.render("layout", {
-    title: "Acceuil",
-    page: "pages/index",
-    username: req.session.username,
-  })
-});
 
-// Get LOGIN 
-app.get('/login', function(req, res, next) {
-  if(req.session.username != undefined) {
-    res.redirect('/');
-  }
 
-  else {
-    res.render("layout", {
-      title: "Connection",
-      page: "pages/login",
-      username: undefined,
-      usernameInput: req.query.username,
-      error: req.session.loginErrorMessage,
-    })
-  }
-});
+// Function MAIN asynchrone pour pouvoir charger la base de données
+async function main() {
+  //   +--------------+
+  //   |   SETUP DB   |
+  //   +--------------+
+  const client = new MongoClient('mongodb://localhost:27017/');
+  try { 
+    await client.connect();
+    console.log("Connected to MongoDB.");
+    const dbo = client.db("LouvainLaVente");
 
-// Post LOGIN
-app.post('/login', function(req, res) {
-  const username = req.body.username;
-  const password = req.body.password;
 
-  if (password === "123pass" && checkUserInput.isValidUsername(username)) {
-    req.session.username = username;
-    delete req.session.loginErrorMessage;
-    if (req.session.previousPageBeforeLoginPage != undefined) {
-      res.redirect(req.session.previousPageBeforeLoginPage);
-      delete req.session.previousPageBeforeLoginPage
-    } else {
-      res.redirect('/');
-    }
-  } else {
-    req.session.loginErrorMessage = "Identifiants incorrects";
-    res.render("layout", {
-      title: "Connection",
-      page: "pages/login",
-      username: "",
-      usernameInput: username,
-      error: req.session.loginErrorMessage,
+    //   +------------+
+    //   |   ROUTES   |
+    //   +------------+
+
+    // Page principale
+    app.get('/', async function(req, res, next) {
+      // Formatage de la date du bas de page
+      let options = { year: 'numeric', month: 'long', day: 'numeric',
+                      hour: '2-digit', minute: '2-digit' };
+      const dateString = new Date().toLocaleDateString('fr-FR', options);
+
+      res.render("layout", {  // Rendu de la page
+        title: "Acceuil",
+        page: "pages/index",
+        username: req.session.username,
+        incidents: await db.incidents.getAll(dbo),
+        date: dateString,
+      })
     });
-  }
-});
+
+    // Get LOGIN 
+    app.get('/login', async function(req, res, next) {
+      if(req.session.username) {
+        res.redirect('/');
+      }
+
+      else {
+        res.render("layout", {
+          title: "Connection",
+          page: "pages/login",
+          username: undefined,
+          usernameInput: req.query.username,
+          error: req.session.loginErrorMessage,
+        })
+      }
+    });
+
+    // Post LOGIN
+    app.post('/login', async function(req, res) {
+      let username = req.body.username;
+      let password = req.body.password;
+
+      if (await db.user.checkLogin(dbo, username, password)) {
+        req.session.username = username;
+        delete req.session.loginErrorMessage;
+        if (req.session.previousPageBeforeLoginPage != undefined) {
+          res.redirect(req.session.previousPageBeforeLoginPage);
+          delete req.session.previousPageBeforeLoginPage
+        } else {
+          res.redirect('/');
+        }
+      } else {
+        req.session.loginErrorMessage = "Identifiants incorrects";
+        res.render("layout", {
+          title: "Connection",
+          page: "pages/login",
+          username: "",
+          usernameInput: username,
+          error: req.session.loginErrorMessage,
+        });
+      }
+    });
 
 
-// Get SIGNUP
-app.get('/signup', function(req, res, next) {
-  res.render("layout", {
-    title: "Inscription",
-    page: "pages/signup",
-    username: req.session.username,
-  })
-});
+    // Get SIGNUP
+    app.get('/signup', async function(req, res, next) {
+      res.render("layout", {
+        title: "Inscription",
+        page: "pages/signup",
+        usernameInput: null,
+        emailInput: null,
+        fullnameInput: null,
+        username: req.session.username,
+        error: undefined,
+      })
+    });
+
+    // Post SIGNUP
+    app.post('/signup', async function(req, res) {
+      let username = req.body.username;
+      let password = req.body.password;
+      let passwordCopy = req.body.passwordCopy;
+      let fullname = req.body.fullname;
+      let email = req.body.email;
+
+      delete req.session.signupErrorMessage;
+
+      // Vérification des conditions de création d'un compte
+      if (!checkUserInput.isValidUsername(username)) {
+        req.session.signupErrorMessage = "Le nom d'utilisateur n'est pas valide."
+      }
+      else if (password != passwordCopy) {
+        req.session.signupErrorMessage = "Les deux mots de passe ne correspondent pas."
+      } 
+      else if (!checkUserInput.isValidPassword(password)) {
+        req.session.signupErrorMessage = "Le mot de passe n'est pas valide. Il doit :\n- faire plus de 8 caractères"
+      }
+      else if (!checkUserInput.isValidEmail(email)) {
+        req.session.signupErrorMessage = "L'email n'est pas valide."
+      }
+
+      // Si les conditions sont OK, tentative de création de compte dans la database
+      if (req.session.signupErrorMessage == undefined) {
+        try {
+          await db.user.create(dbo, username, password, username, email)
+        } catch (err) {
+          req.session.signupErrorMessage = "Une erreur est survenue avec la base de données."
+        }
+      }
+
+      // Erreur > Rechargement de la page signup avec les inputs précomplété (pour
+      // les données non sensibles) et affiche le message d'erreur.
+      if (req.session.signupErrorMessage) {
+        res.render("layout", {
+          title: "Connection",
+          page: "pages/signup",
+          usernameInput: username,
+          fullnameInput: fullname,
+          emailInput: email,
+          error: req.session.signupErrorMessage,
+          username: req.session.username,
+        });
+      
+      // Aucune erreur > Charge la page d'acceuil en étant connecté
+      } else {
+        req.session.username = username,
+        res.redirect('/');
+      }
+    });
 
 
-// Get INCIDENT CREATION
-app.get('/incident-creation', function(req, res, next) {
-  if(req.session.username == undefined) {
-    req.session.loginErrorMessage = "Une connexion est nécessaire pour soumettre des accidents.";
-    req.session.previousPageBeforeLoginPage = '/incident-creation';
-    res.redirect('/login');
-  }
-  else {
-    res.render("layout", {
-      title: "Signalement d’incident",
-      page: "pages/incident-creation",
-      username: req.session.username,
+    // Get INCIDENT CREATION
+    app.get('/incident-creation', function(req, res, next) {
+      if(req.session.username == undefined) {
+        req.session.loginErrorMessage = "Une connexion est nécessaire pour soumettre des accidents.";
+        req.session.previousPageBeforeLoginPage = '/incident-creation';
+        res.redirect('/login');
+      }
+      else {
+        res.render("layout", {
+          title: "Signalement d’incident",
+          page: "pages/incident-creation",
+          username: req.session.username,
+          error: null,
+        })
+      }
+    });
+
+
+    // Post INCIDENT CREATION
+    app.post('/incident-creation', async function(req, res) {
+      let description = req.body.description;
+      let address = req.body.address;
+
+      let error = "";
+
+      // Vérification des conditions
+      if (!checkUserInput.isValidIncidentDescription(description)) {
+        error = "La description doit faire plus de 5 caractères."
+      } else if (!checkUserInput.isValidIncidentAddress(address)) {
+        error = "L'addresse doit faire plus de 15 caractères."
+      } else {
+        try { // Vérification passée, tentative de création d'incident avec la DB
+          await db.incidents.create(dbo, description, address, req.session.username, new Date())
+        } catch {
+          error = "Une erreur est survenue avec la base de donnée."
+        }
+      }
+
+      if (error) {
+        res.render("layout", {
+          title: "Signalement d’incident",
+          page: "pages/incident-creation",
+          username: req.session.username,
+          error: error,
+        })
+      } else {
+        res.redirect("/");
+      }
     })
+
+
+
+    // Erreur 404
+    app.use((req, res) => {
+      res.status(404).send("Page Not Found");
+    });
+
+    //   +------------------+
+    //   |   End > ROUTES   |
+    //   +------------------+
+
+
+    // Création du serveur avec protocol HTTPS
+    https.createServer({
+      key: fs.readFileSync('./key.pem'),
+      cert: fs.readFileSync('./cert.pem'),
+      passphrase: 'ingi'
+    }, app).listen(8080, function () {
+      console.log('Server is running...');
+    });
+
+  // Erreur lors de connection à la base de donnée
+  } catch (err) {
+      console.error("ERROR connecting to MongoDB:", err);
+      process.exit(1); // Cut le serveur (il ne sert a rien sans db)
   }
-});
 
+}
 
-
-https.createServer({
-  key: fs.readFileSync('./key.pem'),
-  cert: fs.readFileSync('./cert.pem'),
-  passphrase: 'ingi'
-}, app).listen(8080, function () {
-  console.log('Server is running...');
-});
+main().catch(console.error);
 
 module.exports = app;
-
-
-
-app.closeServer = () => {
-  app.server.close();
-};

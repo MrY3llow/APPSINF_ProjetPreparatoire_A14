@@ -24,7 +24,7 @@
       
       <% if (error) { %>
       <div class="error-message">
-        <p><%= error %></p>
+        <p><%- error.replace(/\n/g, '<br>') %></p>
       </div>
       <% } %>
     </form>
