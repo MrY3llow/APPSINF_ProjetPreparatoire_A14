@@ -1,4 +1,5 @@
 const utils = require('./utils.js');
+const { documentSearch } = require('./documentSearch.js');
 
 
 //   +---------------+
@@ -17,7 +18,10 @@ const incidents = {
    * ```
    */
   getAll : async function(dbo) {
-    return await dbo.collection('incidents').find().toArray();
+    return await dbo.collection('incidents')
+      .find()
+      .sort({date:-1})
+      .toArray();
   },
 
 
@@ -41,8 +45,43 @@ const incidents = {
       owner: username,
       date: date,
     })
-  }
+  },
 
+
+  search : async function(dbo, input) {
+
+    // Convertis les incidents en String complet avec toutes les valeurs ("{description} {address} {owner} {date}")
+    function incidentToFullString (incidents) {
+      let incidentsString = []
+      for (let incident of incidents) {
+        incidentsString.push(
+          incident.description + " " +
+          incident.address     + " " +
+          incident.owner       + " " +
+          utils.renderDateToString(incident.date, format="short", clock=true)
+        );
+      }
+      return incidentsString;
+    };
+
+    let output = []
+    let incidents = await this.getAll(dbo)
+    let incidentsString = incidentToFullString(incidents);
+
+
+    let incidentSearched = documentSearch(input, incidentsString); // String des incidents avec toutes les valeurs ("{description} {address} {owner} {date}") trier selon le terme de recherche.
+
+    for (let incidentString of incidentSearched) {
+      for (let incident of incidents) {
+        if (incidentString == incidentToFullString([incident])[0]) {
+          output.push(incident);
+        }
+      }
+    }
+      
+    return output;
+  }
+      
 }
 
 //   +----------+
@@ -122,7 +161,7 @@ const user = {
    * @throws {Error} Si la requête à la base de données échoue
    * @exemple ```
    * let fullName = await user.getNameFromUsername(dbo, "Mr_Yellow_")
-   * console.log(fullName) // "Nathan Cobut"
+   * > fullName = "Nathan Cobut"
    * ```
    */
   getNameFromUsername : async function(dbo, username) {

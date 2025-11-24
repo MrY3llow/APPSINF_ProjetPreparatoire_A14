@@ -9,8 +9,10 @@ var bodyParser = require("body-parser");
 var app = express();
 var https = require('https');
 var fs = require('fs');
-const { checkUserInput } = require('./checkInput.js');
-const db = require('./db.js');
+const { checkUserInput } = require('./backend/checkInput.js');
+const db = require('./backend/db.js');
+const utils = require('./backend/utils.js');
+
 MongoClient = require('mongodb').MongoClient;
 
 
@@ -38,7 +40,7 @@ app.use(express.static(path.join(__dirname, 'static')));
 
 
 
-// Function MAIN asynchrone pour pouvoir charger la base de données
+// Fonction MAIN asynchrone pour pouvoir charger la base de données
 async function main() {
   //   +--------------+
   //   |   SETUP DB   |
@@ -54,24 +56,38 @@ async function main() {
     //   |   ROUTES   |
     //   +------------+
 
-    // Page principale
-    app.get('/', async function(req, res, next) {
-      // Formatage de la date du bas de page
-      let options = { year: 'numeric', month: 'long', day: 'numeric',
-                      hour: '2-digit', minute: '2-digit' };
-      const dateString = new Date().toLocaleDateString('fr-FR', options);
+    // GET Page principale (+ barre de recherche)
+    app.get('/', async function(req, res) {
+
+      const currentDateString = utils.renderDateToString(new Date(), "long", clock=true); // Date actuelle affiché en bas de la page
+      let searchInput = req.query.search; // Input de la barre de recherche
+      let incidents;
+
+      // Si une recherche a été effectué
+      if (searchInput) { 
+        incidents = await db.incidents.search(dbo, searchInput)
+      }
+      
+      else { // Aucune recherche, affichage des incidents des plus récentes aux moins récentes
+        incidents = await db.incidents.getAll(dbo)
+      }
+      
+      // remplace l'objet Date en string lisible.
+      for (incident of incidents) {
+        incident.date = utils.renderDateToString(incident.date, "short", clock=true)
+      }
 
       res.render("layout", {  // Rendu de la page
         title: "Acceuil",
         page: "pages/index",
         username: req.session.username,
-        incidents: await db.incidents.getAll(dbo),
-        date: dateString,
+        incidents: incidents,
+        currentDate: currentDateString,
       })
     });
 
     // Get LOGIN 
-    app.get('/login', async function(req, res, next) {
+    app.get('/login', async function(req, res) {
       if(req.session.username) {
         res.redirect('/');
       }
@@ -115,7 +131,7 @@ async function main() {
 
 
     // Get SIGNUP
-    app.get('/signup', async function(req, res, next) {
+    app.get('/signup', async function(req, res) {
       res.render("layout", {
         title: "Inscription",
         page: "pages/signup",
@@ -182,7 +198,7 @@ async function main() {
 
 
     // Get INCIDENT CREATION
-    app.get('/incident-creation', function(req, res, next) {
+    app.get('/incident-creation', function(req, res) {
       if(req.session.username == undefined) {
         req.session.loginErrorMessage = "Une connexion est nécessaire pour soumettre des accidents.";
         req.session.previousPageBeforeLoginPage = '/incident-creation';
@@ -233,9 +249,9 @@ async function main() {
 
 
 
-    // Erreur 404
+    // Page inexistante, redirection vers la page principale
     app.use((req, res) => {
-      res.status(404).send("Page Not Found");
+      res.redirect("/");
     });
 
     //   +------------------+
