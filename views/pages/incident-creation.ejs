@@ -4,7 +4,7 @@
       <h1 class="card-title">Signaler un nouvel incident</h1>
     </header>
 
-    <form class="form">
+    <form class="form" method="POST">
       <div class="field">
         <label for="desc" class="label">Description</label>
         <textarea id="desc" name="description" class="input input-area" placeholder="Que s’est-il passé ?"></textarea>
@@ -12,12 +12,18 @@
 
       <div class="field">
         <label for="addr" class="label">Adresse</label>
-        <input id="addr" type="text" name="adresse" class="input" placeholder="">
+        <input id="addr" type="text" name="address" class="input" placeholder="">
       </div>
 
       <div class="actions">
-        <button class="btn" type="submit" disabled>Soumettre</button>
+        <button class="btn" type="submit">Soumettre</button>
       </div>
+
+      <% if (error) { %>
+        <div class="error-message">
+          <p><%- error.replace(/\n/g, '<br>') %></p>
+        </div>
+      <% } %>
     </form>
   </section>
 </main>

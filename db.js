@@ -11,6 +11,7 @@ const incidents = {
    * @async
    * @param {Object} dbo - L'objet de la base de donnée MongoDB
    * @return {Array} Un tableau de tous les incidents. Valeurs par incidents ["description", "address", "owner", "date"]
+   * @throws {Error} Si la requête à la base de données échoue
    * @exemple ```
    * const allIncidents = await incidents.getAll(dbo);
    * ```
@@ -27,12 +28,13 @@ const incidents = {
    * @param {string} description - La description de l'incident
    * @param {string} address - L'adresse de l'incident
    * @param {string} username - Le nom d'utilisateur du créateur de l'incident
-   * @param {date} date - La date de l'évènement
+   * @param {date} date - La date de l'évènement. Default value : `new Date()`
+   * @throws {Error} Si la requête à la base de données échoue
    * @exemple ```
    * await incidents.create(dbo, "Chute d'arbre", "Rue du feuillage 7, 4280 Hannut", "JeanRenard", new Date());
    * ```
    */
-  create : async function(dbo, description, address, username, date) {
+  create : async function(dbo, description, address, username, date = new Date()) {
     await dbo.collection('incidents').insertOne({
       description: description,
       address: address,
@@ -56,6 +58,7 @@ const user = {
    * @param {string} password - Le mot de passe en clair (sera haché)
    * @param {string} fullname - Le nom complet de l'utilisateur
    * @param {string} email - L'adresse email de l'utilisateur
+   * @throws {Error} Si la requête à la base de données échoue
    * @exemple ```
    * await user.create(dbo, 'jdoe', 'motdepasse123', 'John Doe', 'john@example.com');
    * ```
@@ -76,6 +79,7 @@ const user = {
    * @param {string} username - Le nom d'utilisateur
    * @param {string} password - Le mot de passe en clair (sera haché pour être comparé)
    * @return {boolean} true ou false selon si le mot de passe est valide
+   * @throws {Error} Si la requête à la base de données échoue
    * @exemple ```
    * const isValid = await user.checkLogin(dbo, 'jdoe', 'motdepasse123')
    * ```
@@ -95,6 +99,7 @@ const user = {
    * @param {Object} dbo - L'objet de la base de donnée MongoDB
    * @param {string} username - Le nom d'utilisateur a vérifier
    * @return {boolean} True si l'username est libre. False s'il est déjà utilisé.
+   * @throws {Error} Si la requête à la base de données échoue
    * @exemple ```
    * const isFree = await user.isUsernameFree(dbo, "jdoe")
    * ```
@@ -114,6 +119,7 @@ const user = {
    * @param {Object} dbo - L'objet de la base de donnée MongoDB
    * @param {string} username - Le nom d'utilisateur
    * @return {string} Le nom complet de l'utilisateur
+   * @throws {Error} Si la requête à la base de données échoue
    * @exemple ```
    * let fullName = await user.getNameFromUsername(dbo, "Mr_Yellow_")
    * console.log(fullName) // "Nathan Cobut"
