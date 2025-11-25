@@ -40,4 +40,52 @@
       <p id="current-date"><%= currentDate %></p>
     </div>
   </section>
+
+  <!-- Carte de Louvain-la-Neuve -->
+  <section class="card">
+    <header class="card-head">
+      <h1 class="card-title">📍 Carte des incidents</h1>
+      <p class="card-subtitle">Localisation des accidents à Louvain-la-Neuve</p>
+    </header>
+    
+    <div class="map-container">
+      <div id="map"></div>
+    </div>
+  </section>
 </main>
+
+<!-- Script Leaflet -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+  // Coordonnées de Louvain-la-Neuve
+  const louvainCoords = [50.6719, 4.6114];
+  
+  // Initialiser la carte
+  const map = L.map('map').setView(louvainCoords, 14);
+  
+  // Ajouter la couche de tuiles OpenStreetMap
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(map);
+  
+  // Créer une icône personnalisée
+  const customIcon = L.icon({
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+  
+  // Ajouter le marqueur principal
+  L.marker(louvainCoords, { icon: customIcon })
+    .addTo(map)
+    .bindPopup(`
+      <div style="text-align: center;">
+        <h4 style="margin: 0 0 10px 0;">Louvain-la-Neuve</h4>
+        <p style="margin: 5px 0;">Centre-ville</p>
+      </div>
+    `);
+</script>
