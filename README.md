@@ -48,6 +48,11 @@ Avec openssl d'installé, faire cette commande dans votre terminal :
 
 La clé de sécurité doit être "secretPasswordNoOneShouldHave".
 
+# 2. Instalation du serveur NodeJS
+
+> `npm install`
+Installe les modules nécessaires.
+
 ## 2. Setup les bases de donnée
 Nous utilisons la base de donnée `LouvainLaccident` comme base de donnée principale et `LouvainLaccident_TEST` pour lancer nos batteries de testes.
 
