@@ -4,6 +4,7 @@
       <h1 class="card-title">Signaler un nouvel incident</h1>
     </header>
 
+    <!-- Formulaire de soumission d'accident -->
     <form class="form" method="POST">
 
       <div class="field">
@@ -20,6 +21,7 @@
         <button class="btn" type="submit">Soumettre</button>
       </div>
 
+      <!-- Message d'erreur qui s'affiche s'il existe -->
       <% if (error) { %>
         <div class="error-message">
           <p><%- error.replace(/\n/g, '<br>') %></p>

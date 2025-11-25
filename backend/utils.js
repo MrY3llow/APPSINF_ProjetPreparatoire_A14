@@ -15,8 +15,20 @@ function hashString(str, algorithm = 'sha256') {
 }
 
 /**
- * Convertis un objet de type Date en String.
- * Format : "YYYY"
+ * Convertis un objet de type Date en String selon différents formats.
+ * 
+ * Formats :
+ * 
+ * - `format="short"` : "DD/MM/YYYY"
+ * - `format="long"` : "DD month YYYY"
+ * 
+ * - `clock=true` : ajoute la date. Si `format="long"`, ajoute un "à" entre le jour et l'heure.
+ * - `clock=false` : n'ajoute pas la date
+ * 
+ * @param {Date} date - La date en objet Date a convertir en string
+ * @param {string} format - Indique la structure de sortie pour la date
+ * @param {boolean} clock - Indique s'il l'heure doit être affichée ou pas
+ * @return {string} L'heure dans le format demandé.
  */
 function renderDateToString(date, format="short", clock=true) {
   switch (format) {

@@ -48,6 +48,17 @@ const incidents = {
   },
 
 
+  /**
+   * Renvois la liste des incidents trier dans l'ordre des plus au moins correspondant
+   * a la recherche. La recherche peut se faire avec plusieurs mots.
+   * 
+   * Utilise `utils.documentSearch()` de `/backend/utils.js`
+   * 
+   * @param {Object} dbo - L'objet de la base de donnée MongoDB
+   * @param {string} input - Le string de la recherche
+   * @return {Array} Un tableau de tous les incidents trier du plus au moins correspondant à la recherche. Valeurs par incidents ["description", "address", "owner", "date"]
+   * @throws {Error} Si la requête à la base de données échoue
+   */
   search : async function(dbo, input) {
 
     // Convertis les incidents en String complet avec toutes les valeurs ("{description} {address} {owner} {date}")
