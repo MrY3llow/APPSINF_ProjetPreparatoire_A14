@@ -47,8 +47,9 @@ Avec openssl d'installé, faire cette commande dans votre terminal :
 > `openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365`
 
 La clé de sécurité doit être "secretPasswordNoOneShouldHave".
+Appuyez ENTREE pour toutes les autres valeurs
 
-# 2. Instalation du serveur NodeJS
+## 2. Instalation du serveur NodeJS
 
 > `npm install`
 Installe les modules nécessaires.
@@ -61,7 +62,7 @@ Nous utilisons la base de donnée `LouvainLaccident` comme base de donnée princ
 
 "`2 document(s) imported successfully. 0 document(s) failed to import.`" devrait être retourné
 
-> `mongoimport --db=LouvainLaccident --collection=incidents --file=./setup-dincidents.json --jsonArray`
+> `mongoimport --db=LouvainLaccident --collection=incidents --file=./setup-data/incidents.json --jsonArray`
 
 "`6 document(s) imported successfully. 0 document(s) failed to import.`" devrait être retourné.
 
