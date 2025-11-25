@@ -10,10 +10,10 @@ const checkuserInput = {
      */
     isValidUsername : function(input) {
         // BEGIN STRIP
-        if(input.length < 6){
-            return false;
+        if(input.length >= 5){
+            return true;
         }
-        return true;
+        return false;
         // END STRIP
 
     },
@@ -27,50 +27,26 @@ const checkuserInput = {
      * @return {boolean} True s'il est valide. False s'il n'est pas valide
      */
     isValidPassword : function(input) {
-        if(input.length < 8){
-            return false;
+        if(input.length >= 8){
+            return true;
         }
-        return true;
+        return false;
 
-    },
-
-    /**
-     * Vérifie qu'un String respecte bien les conditions d'un EMAIL.
-     * 
-     * Conditions :
-     * 
-     * - avant le `@` :
-     *   - lettres miniscules & majuscules
-     *   - chiffres
-     *   - un ou plusieurs caractères
-     * 
-     * - `@` obligatoire
-     * 
-     * - le nom de domaine (après le `@`, ex: `gmail`) :
-     *   - au moins un caractère
-     *   - un point `.`
-     * 
-     * - l'extension de domaine (ex: `.com`) :
-     *   - uniquement des lettres
-     *   - min. 2 caractères
-     * @param {string} input - Le email à vérifier
-     * @return {boolean} True s'il est valide. False s'il n'est pas valide
-     */
-    isValidEmail : function(input) {
-        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        return regex.test(input);
     },
 
     /**
      * Vérifie qu'un String respecte bien les conditions d'une DESCRIPTION D'ACCIDENT.
      * 
      * Conditions :
-     * - faire plus de 5 caractères
+     * - faire plus de 20 caractères
      * @param {string} input - La description à vérifier
      * @return {boolean} True s'il est valide. False s'il n'est pas valide
      */
     isValidIncidentDescription : function(input) {
-        return (input.length > 5);
+        if (input.length >= 20) {
+            return true;
+        }
+        return false;
     },
 
     /**

@@ -1,0 +1,38 @@
+[
+  {
+  "description": "Fuite d'eau importante dans la rue",
+  "address": "Rue de la Paix, 1000 Bruxelles",
+  "owner": "Marie Dupont",
+  "date": "28/09/2025"
+  },
+  {
+  "description": "Nid de poule dangereux sur la chaussée",
+  "address": "Avenue Louise, 1050 Ixelles",
+  "owner": "Jean Martin",
+  "date": "27/09/2025"
+  },
+  {
+  "description": "Éclairage public défaillant",
+  "address": "Boulevard Anspach, 1000 Bruxelles",
+  "owner": "Sophie Leroy",
+  "date": "26/09/2025"
+  },
+  {
+  "description": "Arbre tombé bloquant la circulation",
+  "address": "Chaussée de Waterloo, 1180 Uccle",
+  "owner": "Pierre Bernard",
+  "date": "25/09/2025"
+  },
+  {
+  "description": "Graffitis sur façade publique",
+  "address": "Place Eugène Flagey, 1050 Ixelles",
+  "owner": "Anna Rousseau",
+  "date": "24/09/2025"
+  },
+  {
+  "description": "Trottoir endommagé suite aux travaux",
+  "address": "Rue Neuve, 1000 Bruxelles",
+  "owner": "Michel Leblanc",
+  "date": "23/09/2025"
+  }
+]

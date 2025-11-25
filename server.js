@@ -9,7 +9,7 @@ var bodyParser = require("body-parser");
 var app = express();
 var https = require('https');
 var fs = require('fs');
-const { checkUserInput } = require('./backend/checkInput.js');
+const { checkUserInput } = require('./backend/check-input.js');
 const db = require('./backend/db.js');
 const utils = require('./backend/utils.js');
 
@@ -26,7 +26,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.urlencoded({ extended: true })); 
 app.use(bodyParser.json());
 app.use(session({
-  secret: "secret",
+  secret: "secretPasswordNoOneShouldHave",
   resave: false,
   saveUninitialized: true,
   cookie: { 
@@ -45,11 +45,12 @@ async function main() {
   //   +--------------+
   //   |   SETUP DB   |
   //   +--------------+
+  const dbName = process.env.MONGO_DB_NAME || 'LouvainLaccident';
   const client = new MongoClient('mongodb://localhost:27017/');
   try { 
     await client.connect();
-    console.log("Connected to MongoDB.");
-    const dbo = client.db("LouvainLaVente");
+    console.log(`Connected to MongoDB (database: ${dbName}).`);
+    const dbo = client.db(dbName);
 
 
     //   +------------+
@@ -154,17 +155,20 @@ async function main() {
       delete req.session.signupErrorMessage;
 
       // Vérification des conditions de création d'un compte
-      if (!checkUserInput.isValidUsername(username)) {
+      if (!checkUserInput.isValidUsername(username)) { // Est-ce que l'username est valide
         req.session.signupErrorMessage = "Le nom d'utilisateur n'est pas valide."
       }
-      else if (password != passwordCopy) {
+      else if (!await db.user.isUsernameFree(dbo, username)) { // Est-ce que l'username est libre
+        req.session.signupErrorMessage = "Ce nom d'utilisateur est déjà utilisé."
+      }
+      else if (!await db.user.isEmailFree(dbo, email)) { // Est-ce que l'email est libre
+        req.session.signupErrorMessage = "Cet email est déjà utilisé."
+      }
+      else if (password != passwordCopy) { // Est-ce que les deux password complété correspondent
         req.session.signupErrorMessage = "Les deux mots de passe ne correspondent pas."
       } 
-      else if (!checkUserInput.isValidPassword(password)) {
+      else if (!checkUserInput.isValidPassword(password)) {  // Est-ce que le mot de passe est valide
         req.session.signupErrorMessage = "Le mot de passe n'est pas valide. Il doit :\n- faire plus de 8 caractères"
-      }
-      else if (!checkUserInput.isValidEmail(email)) {
-        req.session.signupErrorMessage = "L'email n'est pas valide."
       }
 
       // Si les conditions sont OK, tentative de création de compte dans la database
@@ -260,12 +264,13 @@ async function main() {
 
 
     // Création du serveur avec protocol HTTPS
+    const PORT = process.env.PORT || 8080;
     https.createServer({
       key: fs.readFileSync('./key.pem'),
       cert: fs.readFileSync('./cert.pem'),
-      passphrase: 'ingi'
-    }, app).listen(8080, function () {
-      console.log('Server is running...');
+      passphrase: 'secretPasswordNoOneShouldHave'
+    }, app).listen(PORT, function () {
+      console.log(`Server is running on port ${PORT}...`);
     });
 
   // Erreur lors de connection à la base de donnée

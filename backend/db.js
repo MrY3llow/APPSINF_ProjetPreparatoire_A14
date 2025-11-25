@@ -1,5 +1,5 @@
 const utils = require('./utils.js');
-const { documentSearch } = require('./documentSearch.js');
+const { documentSearch } = require('./document-search.js');
 
 
 //   +---------------+
@@ -144,7 +144,7 @@ const user = {
   },
 
   /**
-   * Vérifie qu'un nom d'utilisateur est libre, ou s'il est déjà utilisé
+   * Vérifie qu'un NOM d'UTILISATEUR est libre, ou s'il est déjà utilisé
    * @async
    * @param {Object} dbo - L'objet de la base de donnée MongoDB
    * @param {string} username - Le nom d'utilisateur a vérifier
@@ -157,6 +157,25 @@ const user = {
   isUsernameFree : async function(dbo, username) {
     let result = await dbo.collection('users').findOne({
       username: username
+    })
+    if (result) return false;
+    else return true;
+  },
+
+  /**
+   * Vérifie qu'un EMAIL est libre, ou s'il est déjà utilisé
+   * @async
+   * @param {Object} dbo - L'objet de la base de donnée MongoDB
+   * @param {string} email - L'email a vérifier
+   * @return {boolean} True si l'email est libre. False s'il est déjà utilisé.
+   * @throws {Error} Si la requête à la base de données échoue
+   * @exemple ```
+   * const isFree = await user.isEmailFree(dbo, "jdoe@gmail.com")
+   * ```
+   */
+  isEmailFree : async function(dbo, email) {
+    let result = await dbo.collection('users').findOne({
+      email: email
     })
     if (result) return false;
     else return true;
