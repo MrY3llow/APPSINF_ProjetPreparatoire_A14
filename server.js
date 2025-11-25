@@ -9,8 +9,10 @@ var bodyParser = require("body-parser");
 var app = express();
 var https = require('https');
 var fs = require('fs');
-const { checkUserInput } = require('./checkInput.js');
-const db = require('./db.js');
+const { checkUserInput } = require('./backend/check-input.js');
+const db = require('./backend/db.js');
+const utils = require('./backend/utils.js');
+
 MongoClient = require('mongodb').MongoClient;
 
 
@@ -24,7 +26,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.urlencoded({ extended: true })); 
 app.use(bodyParser.json());
 app.use(session({
-  secret: "secret",
+  secret: "secretPasswordNoOneShouldHave",
   resave: false,
   saveUninitialized: true,
   cookie: { 
@@ -38,40 +40,55 @@ app.use(express.static(path.join(__dirname, 'static')));
 
 
 
-// Function MAIN asynchrone pour pouvoir charger la base de données
+// Fonction MAIN asynchrone pour pouvoir charger la base de données
 async function main() {
   //   +--------------+
   //   |   SETUP DB   |
   //   +--------------+
+  const dbName = process.env.MONGO_DB_NAME || 'LouvainLaccident';
   const client = new MongoClient('mongodb://localhost:27017/');
   try { 
     await client.connect();
-    console.log("Connected to MongoDB.");
-    const dbo = client.db("LouvainLaVente");
+    console.log(`Connected to MongoDB (database: ${dbName}).`);
+    const dbo = client.db(dbName);
 
 
     //   +------------+
     //   |   ROUTES   |
     //   +------------+
 
-    // Page principale
-    app.get('/', async function(req, res, next) {
-      // Formatage de la date du bas de page
-      let options = { year: 'numeric', month: 'long', day: 'numeric',
-                      hour: '2-digit', minute: '2-digit' };
-      const dateString = new Date().toLocaleDateString('fr-FR', options);
+    // GET Page principale (+ barre de recherche)
+    app.get('/', async function(req, res) {
+
+      const currentDateString = utils.renderDateToString(new Date(), "long", clock=true); // Date actuelle affiché en bas de la page
+      let searchInput = req.query.search; // Input de la barre de recherche
+      let incidents;
+
+      // Si une recherche a été effectué
+      if (searchInput) { 
+        incidents = await db.incidents.search(dbo, searchInput)
+      }
+      
+      else { // Aucune recherche, affichage des incidents des plus récentes aux moins récentes
+        incidents = await db.incidents.getAll(dbo)
+      }
+      
+      // remplace l'objet Date en string lisible.
+      for (incident of incidents) {
+        incident.date = utils.renderDateToString(incident.date, "short", clock=true)
+      }
 
       res.render("layout", {  // Rendu de la page
         title: "Acceuil",
         page: "pages/index",
         username: req.session.username,
-        incidents: await db.incidents.getAll(dbo),
-        date: dateString,
+        incidents: incidents,
+        currentDate: currentDateString,
       })
     });
 
     // Get LOGIN 
-    app.get('/login', async function(req, res, next) {
+    app.get('/login', async function(req, res) {
       if(req.session.username) {
         res.redirect('/');
       }
@@ -115,7 +132,7 @@ async function main() {
 
 
     // Get SIGNUP
-    app.get('/signup', async function(req, res, next) {
+    app.get('/signup', async function(req, res) {
       res.render("layout", {
         title: "Inscription",
         page: "pages/signup",
@@ -138,17 +155,20 @@ async function main() {
       delete req.session.signupErrorMessage;
 
       // Vérification des conditions de création d'un compte
-      if (!checkUserInput.isValidUsername(username)) {
+      if (!checkUserInput.isValidUsername(username)) { // Est-ce que l'username est valide
         req.session.signupErrorMessage = "Le nom d'utilisateur n'est pas valide."
       }
-      else if (password != passwordCopy) {
+      else if (!await db.user.isUsernameFree(dbo, username)) { // Est-ce que l'username est libre
+        req.session.signupErrorMessage = "Ce nom d'utilisateur est déjà utilisé."
+      }
+      else if (!await db.user.isEmailFree(dbo, email)) { // Est-ce que l'email est libre
+        req.session.signupErrorMessage = "Cet email est déjà utilisé."
+      }
+      else if (password != passwordCopy) { // Est-ce que les deux password complété correspondent
         req.session.signupErrorMessage = "Les deux mots de passe ne correspondent pas."
       } 
-      else if (!checkUserInput.isValidPassword(password)) {
+      else if (!checkUserInput.isValidPassword(password)) {  // Est-ce que le mot de passe est valide
         req.session.signupErrorMessage = "Le mot de passe n'est pas valide. Il doit :\n- faire plus de 8 caractères"
-      }
-      else if (!checkUserInput.isValidEmail(email)) {
-        req.session.signupErrorMessage = "L'email n'est pas valide."
       }
 
       // Si les conditions sont OK, tentative de création de compte dans la database
@@ -182,7 +202,7 @@ async function main() {
 
 
     // Get INCIDENT CREATION
-    app.get('/incident-creation', function(req, res, next) {
+    app.get('/incident-creation', function(req, res) {
       if(req.session.username == undefined) {
         req.session.loginErrorMessage = "Une connexion est nécessaire pour soumettre des accidents.";
         req.session.previousPageBeforeLoginPage = '/incident-creation';
@@ -233,9 +253,9 @@ async function main() {
 
 
 
-    // Erreur 404
+    // Page inexistante, redirection vers la page principale
     app.use((req, res) => {
-      res.status(404).send("Page Not Found");
+      res.redirect("/");
     });
 
     //   +------------------+
@@ -244,12 +264,13 @@ async function main() {
 
 
     // Création du serveur avec protocol HTTPS
+    const PORT = process.env.PORT || 8080;
     https.createServer({
       key: fs.readFileSync('./key.pem'),
       cert: fs.readFileSync('./cert.pem'),
-      passphrase: 'ingi'
-    }, app).listen(8080, function () {
-      console.log('Server is running...');
+      passphrase: 'secretPasswordNoOneShouldHave'
+    }, app).listen(PORT, function () {
+      console.log(`Server is running on port ${PORT}...`);
     });
 
   // Erreur lors de connection à la base de donnée

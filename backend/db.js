@@ -1,4 +1,5 @@
 const utils = require('./utils.js');
+const { documentSearch } = require('./document-search.js');
 
 
 //   +---------------+
@@ -17,7 +18,10 @@ const incidents = {
    * ```
    */
   getAll : async function(dbo) {
-    return await dbo.collection('incidents').find().toArray();
+    return await dbo.collection('incidents')
+      .find()
+      .sort({date:-1})
+      .toArray();
   },
 
 
@@ -41,8 +45,54 @@ const incidents = {
       owner: username,
       date: date,
     })
-  }
+  },
 
+
+  /**
+   * Renvois la liste des incidents trier dans l'ordre des plus au moins correspondant
+   * a la recherche. La recherche peut se faire avec plusieurs mots.
+   * 
+   * Utilise `utils.documentSearch()` de `/backend/utils.js`
+   * 
+   * @param {Object} dbo - L'objet de la base de donnée MongoDB
+   * @param {string} input - Le string de la recherche
+   * @return {Array} Un tableau de tous les incidents trier du plus au moins correspondant à la recherche. Valeurs par incidents ["description", "address", "owner", "date"]
+   * @throws {Error} Si la requête à la base de données échoue
+   */
+  search : async function(dbo, input) {
+
+    // Convertis les incidents en String complet avec toutes les valeurs ("{description} {address} {owner} {date}")
+    function incidentToFullString (incidents) {
+      let incidentsString = []
+      for (let incident of incidents) {
+        incidentsString.push(
+          incident.description + " " +
+          incident.address     + " " +
+          incident.owner       + " " +
+          utils.renderDateToString(incident.date, format="short", clock=true)
+        );
+      }
+      return incidentsString;
+    };
+
+    let output = []
+    let incidents = await this.getAll(dbo)
+    let incidentsString = incidentToFullString(incidents);
+
+
+    let incidentSearched = documentSearch(input, incidentsString); // String des incidents avec toutes les valeurs ("{description} {address} {owner} {date}") trier selon le terme de recherche.
+
+    for (let incidentString of incidentSearched) {
+      for (let incident of incidents) {
+        if (incidentString == incidentToFullString([incident])[0]) {
+          output.push(incident);
+        }
+      }
+    }
+      
+    return output;
+  }
+      
 }
 
 //   +----------+
@@ -94,7 +144,7 @@ const user = {
   },
 
   /**
-   * Vérifie qu'un nom d'utilisateur est libre, ou s'il est déjà utilisé
+   * Vérifie qu'un NOM d'UTILISATEUR est libre, ou s'il est déjà utilisé
    * @async
    * @param {Object} dbo - L'objet de la base de donnée MongoDB
    * @param {string} username - Le nom d'utilisateur a vérifier
@@ -112,6 +162,25 @@ const user = {
     else return true;
   },
 
+  /**
+   * Vérifie qu'un EMAIL est libre, ou s'il est déjà utilisé
+   * @async
+   * @param {Object} dbo - L'objet de la base de donnée MongoDB
+   * @param {string} email - L'email a vérifier
+   * @return {boolean} True si l'email est libre. False s'il est déjà utilisé.
+   * @throws {Error} Si la requête à la base de données échoue
+   * @exemple ```
+   * const isFree = await user.isEmailFree(dbo, "jdoe@gmail.com")
+   * ```
+   */
+  isEmailFree : async function(dbo, email) {
+    let result = await dbo.collection('users').findOne({
+      email: email
+    })
+    if (result) return false;
+    else return true;
+  },
+
 
   /**
    * Obtiens le nom complet d'un utilisateur en de du nom d'utilisateur.
@@ -122,7 +191,7 @@ const user = {
    * @throws {Error} Si la requête à la base de données échoue
    * @exemple ```
    * let fullName = await user.getNameFromUsername(dbo, "Mr_Yellow_")
-   * console.log(fullName) // "Nathan Cobut"
+   * > fullName = "Nathan Cobut"
    * ```
    */
   getNameFromUsername : async function(dbo, username) {
